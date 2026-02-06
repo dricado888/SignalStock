@@ -1,0 +1,29 @@
+# Environment
+.env
+*.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Data
+data/
+*.csv
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Docker
+.docker/
+EOF
