@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    @apply bg-terminal-bg text-terminal-text antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: #09090b; }
+  ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+}
+
+@layer utilities {
+  .font-ticker { font-family: 'JetBrains Mono', monospace; }
+  .border-terminal { border-color: #27272a; }
+  .text-cyan { color: #22d3ee; }
+}

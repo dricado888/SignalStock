@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SignalStock Design Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #09090b; --surface: #111113; --border: #27272a;
+    --muted: #52525b; --text: #f4f4f5; --subtext: #a1a1aa;
+    --cyan: #22d3ee; --positive: #4ade80; --negative: #f87171;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .border-b { border-bottom: 1px solid var(--border); }
+  .border { border: 1px solid var(--border); }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    background: rgba(9,9,11,0.92);
+    padding: 0 24px;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); display: inline-block; margin-right: 10px; }
+  .logo-text { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; }
+  .logo-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; margin-left: 10px; text-transform: uppercase; }
+  .live-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-right: 16px; }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--positive); }
+  .btn-alerts {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+    color: var(--cyan); border: 1px solid rgba(34,211,238,0.4); border-radius: 4px;
+    padding: 6px 14px; letter-spacing: 0.08em; cursor: pointer;
+    background: transparent;
+  }
+
+  /* ── STAT BAR ── */
+  .stat-bar {
+    display: flex; align-items: center; gap: 20px;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface); padding: 12px 20px;
+    margin: 24px; flex-wrap: wrap;
+  }
+  .stat { display: flex; align-items: baseline; gap: 8px; }
+  .stat-val { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; }
+  .stat-val.accent { color: var(--cyan); }
+  .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .divider { width: 1px; height: 16px; background: var(--border); }
+  .stat-bar-end { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.12em; cursor: pointer; }
+  .stat-bar-end:hover { color: var(--cyan); }
+
+  /* ── CHARTS ── */
+  .charts-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 24px 24px; }
+  .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; height: 180px; }
+  .chart-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px; }
+
+  /* Fake donut chart */
+  .donut-wrap { display: flex; align-items: center; gap: 16px; height: calc(100% - 24px); }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .legend-row { display: flex; align-items: center; justify-content: space-between; }
+  .legend-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .legend-name { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--subtext); letter-spacing: 0.1em; }
+  .legend-pct { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text); }
+
+  /* Fake line chart */
+  .line-area { position: relative; height: calc(100% - 24px); display: flex; align-items: flex-end; gap: 4px; padding-bottom: 4px; }
+  .bar-day { flex: 1; background: rgba(34,211,238,0.15); border-radius: 2px 2px 0 0; position: relative; }
+  .bar-day.active { background: rgba(34,211,238,0.4); }
+
+  /* Fake bar chart */
+  .hbar-list { display: flex; flex-direction: column; gap: 10px; height: calc(100% - 24px); justify-content: center; }
+  .hbar-row { display: flex; align-items: center; gap: 8px; }
+  .hbar-ticker { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: var(--cyan); width: 36px; flex-shrink: 0; }
+  .hbar-track { flex: 1; height: 8px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .hbar-fill { height: 100%; border-radius: 2px; }
+  .hbar-count { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--subtext); width: 24px; text-align: right; }
+
+  /* ── WATCHLIST PANEL ── */
+  .watchlist-panel {
+    margin: 0 24px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 12px 16px;
+  }
+  .watchlist-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .watchlist-title { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+  .watchlist-count { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--cyan); letter-spacing: 0.12em; }
+  .watchlist-clear { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: var(--muted); margin-left: 12px; cursor: pointer; letter-spacing: 0.1em; }
+  .watchlist-input {
+    width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
+    padding: 8px 12px; color: var(--subtext); font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.06em; margin-bottom: 10px;
+  }
+  .watchlist-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .watch-chip {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700;
+    color: var(--cyan); border: 1px solid rgba(34,211,238,0.3); background: rgba(34,211,238,0.08);
+    padding: 3px 8px; border-radius: 3px; cursor: pointer;
+  }
+
+  /* ── SECTOR HINTS ── */
+  .sector-hints { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+  .sector-pill {
+    font-family: 'JetBrains Mono', monospace; font-size: 8px; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 3px; padding: 2px 6px; letter-spacing: 0.1em;
+  }
+
+  /* ── FILTERS ── */
+  .filters { display: flex; gap: 8px; margin: 0 24px 16px; flex-wrap: wrap; align-items: center; }
+  .filter-select {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+    padding: 7px 12px; letter-spacing: 0.08em; cursor: pointer; appearance: none;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; margin: 0 24px 12px; }
+
+  /* ── EVENT CARDS ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 24px; }
+  .event-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px; position: relative;
+    transition: border-color 0.2s;
+  }
+  .event-card:hover { border-color: rgba(34,211,238,0.35); }
+  .event-card .left-glow { position: absolute; left: 0; top: 25%; bottom: 25%; width: 1px; background: var(--cyan); opacity: 0; border-radius: 2px; }
+  .event-card:hover .left-glow { opacity: 0.6; }
+  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .card-type { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.12em; font-weight: 600; }
+  .card-sentiment { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.1em; }
+  .card-sentiment.bull { color: var(--positive); }
+  .card-sentiment.bear { color: var(--negative); }
+  .card-sentiment.neut { color: var(--subtext); }
+  .card-tickers { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .ticker { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--cyan); }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.45; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; }
+  .card-meta { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+  .card-read { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-decoration: none; }
+  .card-read:hover { color: var(--cyan); }
+
+  /* ── SUBSCRIBE MODAL ── */
+  .modal-overlay { background: rgba(0,0,0,0.75); position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 50; }
+  .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 400px; }
+  .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+  .modal-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  .modal-sub { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); margin-top: 3px; letter-spacing: 0.08em; }
+  .modal-close { color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; }
+  .input-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  .modal-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 9px 12px; color: var(--text); font-size: 13px; margin-bottom: 16px; }
+  .modal-input:focus { outline: none; border-color: rgba(34,211,238,0.4); }
+  .result-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .result-item:last-child { border-bottom: none; }
+  .result-ticker { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--cyan); margin-right: 8px; font-size: 11px; }
+  .result-company { color: var(--subtext); font-size: 11px; }
+  .result-add { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cyan); cursor: pointer; font-weight: 700; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .chip { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; color: var(--cyan); border: 1px solid rgba(34,211,238,0.3); background: rgba(34,211,238,0.08); padding: 3px 8px; border-radius: 3px; }
+  .btn-sub { width: 100%; background: var(--cyan); color: #09090b; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; border: none; border-radius: 4px; padding: 11px; cursor: pointer; }
+  .modal-disclaimer { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: var(--muted); text-align: center; margin-top: 10px; letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+
+<!-- ════════════ MAIN DASHBOARD ════════════ -->
+<div style="margin-bottom:60px">
+
+  <!-- Header -->
+  <header>
+    <div style="display:flex;align-items:center">
+      <span class="logo-dot"></span>
+      <span class="logo-text">SignalStock</span>
+      <span class="logo-sub">· Market Intelligence</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="live-badge"><span class="live-dot"></span> LIVE</div>
+      <button class="btn-alerts">GET ALERTS →</button>
+    </div>
+  </header>
+
+  <!-- Stat bar -->
+  <div class="stat-bar">
+    <div class="stat"><span class="stat-val">1,204</span><span class="stat-label">Events</span></div>
+    <div class="divider"></div>
+    <div class="stat"><span class="stat-val">127</span><span class="stat-label">Stocks Tracked</span></div>
+    <div class="divider"></div>
+    <div class="stat"><span class="stat-val accent">23</span><span class="stat-label">Today</span></div>
+    <div class="divider"></div>
+    <div class="stat"><span class="stat-val accent">68%</span><span class="stat-label">Bullish</span></div>
+    <span class="stat-bar-end">→ GET ALERTS</span>
+  </div>
+
+  <!-- Watchlist panel -->
+  <div class="watchlist-panel">
+    <div class="watchlist-header">
+      <span class="watchlist-title">WATCHLIST</span>
+      <div>
+        <span class="watchlist-count">3 WATCHING</span>
+        <span class="watchlist-clear">CLEAR ALL</span>
+      </div>
+    </div>
+    <input class="watchlist-input" placeholder="Search ticker or company to add..." readonly>
+    <div class="watchlist-chips">
+      <span class="watch-chip">$NVDA ×</span>
+      <span class="watch-chip">$TSLA ×</span>
+      <span class="watch-chip">$AAPL ×</span>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="charts-row">
+    <!-- Donut -->
+    <div class="chart-box">
+      <div class="chart-label">SENTIMENT</div>
+      <div class="donut-wrap">
+        <svg class="donut-svg" width="88" height="88" viewBox="0 0 88 88">
+          <circle cx="44" cy="44" r="30" fill="none" stroke="#27272a" stroke-width="14"/>
+          <circle cx="44" cy="44" r="30" fill="none" stroke="#4ade80" stroke-width="14"
+            stroke-dasharray="75 113" stroke-dashoffset="-28" stroke-linecap="butt"/>
+          <circle cx="44" cy="44" r="30" fill="none" stroke="#f87171" stroke-width="14"
+            stroke-dasharray="60 113" stroke-dashoffset="-103" stroke-linecap="butt"/>
+          <circle cx="44" cy="44" r="30" fill="none" stroke="#52525b" stroke-width="14"
+            stroke-dasharray="53 113" stroke-dashoffset="-163" stroke-linecap="butt"/>
+        </svg>
+        <div class="donut-legend">
+          <div class="legend-row">
+            <span><span class="legend-dot" style="background:#4ade80"></span><span class="legend-name">BULLISH</span></span>
+            <span class="legend-pct">40%</span>
+          </div>
+          <div class="legend-row">
+            <span><span class="legend-dot" style="background:#f87171"></span><span class="legend-name">BEARISH</span></span>
+            <span class="legend-pct">32%</span>
+          </div>
+          <div class="legend-row">
+            <span><span class="legend-dot" style="background:#52525b"></span><span class="legend-name">NEUTRAL</span></span>
+            <span class="legend-pct">28%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Events / day line -->
+    <div class="chart-box">
+      <div class="chart-label">EVENTS / 7 DAYS</div>
+      <div class="line-area">
+        <div class="bar-day" style="height:40%"></div>
+        <div class="bar-day" style="height:55%"></div>
+        <div class="bar-day" style="height:70%"></div>
+        <div class="bar-day active" style="height:90%"></div>
+        <div class="bar-day" style="height:65%"></div>
+        <div class="bar-day active" style="height:80%"></div>
+        <div class="bar-day active" style="height:100%"></div>
+      </div>
+    </div>
+
+    <!-- Top stocks -->
+    <div class="chart-box">
+      <div class="chart-label">TOP STOCKS</div>
+      <div class="hbar-list">
+        <div class="hbar-row">
+          <span class="hbar-ticker">NVDA</span>
+          <div class="hbar-track"><div class="hbar-fill" style="width:100%;background:#22d3ee"></div></div>
+          <span class="hbar-count">42</span>
+        </div>
+        <div class="hbar-row">
+          <span class="hbar-ticker">TSLA</span>
+          <div class="hbar-track"><div class="hbar-fill" style="width:90%;background:rgba(34,211,238,0.65)"></div></div>
+          <span class="hbar-count">38</span>
+        </div>
+        <div class="hbar-row">
+          <span class="hbar-ticker">AAPL</span>
+          <div class="hbar-track"><div class="hbar-fill" style="width:74%;background:rgba(34,211,238,0.48)"></div></div>
+          <span class="hbar-count">31</span>
+        </div>
+        <div class="hbar-row">
+          <span class="hbar-ticker">MSFT</span>
+          <div class="hbar-track"><div class="hbar-fill" style="width:57%;background:rgba(34,211,238,0.35)"></div></div>
+          <span class="hbar-count">24</span>
+        </div>
+        <div class="hbar-row">
+          <span class="hbar-ticker">GOOGL</span>
+          <div class="hbar-track"><div class="hbar-fill" style="width:43%;background:rgba(34,211,238,0.25)"></div></div>
+          <span class="hbar-count">18</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section label + filters -->
+  <div class="section-label">LIVE EVENTS · 1,204 TOTAL</div>
+  <div class="filters">
+    <select class="filter-select"><option>ALL EVENTS</option></select>
+    <select class="filter-select"><option>ALL SENTIMENTS</option></select>
+  </div>
+
+  <!-- Event cards -->
+  <div class="cards-grid">
+    <!-- Card 1 -->
+    <div class="event-card">
+      <div class="left-glow"></div>
+      <div class="card-top">
+        <span class="card-type">PRODUCT LAUNCH</span>
+        <span class="card-sentiment bull">↑ BULLISH</span>
+      </div>
+      <div class="card-tickers"><span class="ticker">$TSLA</span></div>
+      <p class="card-title">Tesla Unveils New Model Y Juniper with Enhanced Autopilot Features and Lower Price</p>
+      <div class="card-footer">
+        <span class="card-meta">REUTERS · 2h ago</span>
+        <a class="card-read" href="#">READ →</a>
+      </div>
+    </div>
+    <!-- Card 2 -->
+    <div class="event-card">
+      <div class="left-glow"></div>
+      <div class="card-top">
+        <span class="card-type">REGULATORY</span>
+        <span class="card-sentiment bear">↓ BEARISH</span>
+      </div>
+      <div class="card-tickers"><span class="ticker">$NVDA</span></div>
+      <p class="card-title">US Moves to Restrict Nvidia Chip Exports to China Amid Escalating Tech War</p>
+      <div class="card-footer">
+        <span class="card-meta">BLOOMBERG · 5h ago</span>
+        <a class="card-read" href="#">READ →</a>
+      </div>
+    </div>
+    <!-- Card 3 -->
+    <div class="event-card">
+      <div class="left-glow"></div>
+      <div class="card-top">
+        <span class="card-type">EARNINGS</span>
+        <span class="card-sentiment neut">→ NEUTRAL</span>
+      </div>
+      <div class="card-tickers"><span class="ticker">$AAPL</span></div>
+      <p class="card-title">Apple Reports Q1 2026 Earnings In Line With Wall Street Estimates</p>
+      <div class="card-footer">
+        <span class="card-meta">CNBC · 1d ago</span>
+        <a class="card-read" href="#">READ →</a>
+      </div>
+    </div>
+    <!-- Card 4 -->
+    <div class="event-card">
+      <div class="left-glow"></div>
+      <div class="card-top">
+        <span class="card-type">PARTNERSHIP</span>
+        <span class="card-sentiment bull">↑ BULLISH</span>
+      </div>
+      <div class="card-tickers"><span class="ticker">$MSFT</span><span class="ticker">$NVDA</span></div>
+      <p class="card-title">Microsoft and Nvidia Announce $10B Azure AI Infrastructure Partnership</p>
+      <div class="card-footer">
+        <span class="card-meta">WSJ · 2d ago</span>
+        <a class="card-read" href="#">READ →</a>
+      </div>
+    </div>
+    <!-- Card 5 -->
+    <div class="event-card">
+      <div class="left-glow"></div>
+      <div class="card-top">
+        <span class="card-type">M&amp;A</span>
+        <span class="card-sentiment bull">↑ BULLISH</span>
+      </div>
+      <div class="card-tickers"><span class="ticker">$GOOGL</span></div>
+      <p class="card-title">Google to Acquire AI Startup Alchemy for $2.4B in Largest Deal Since 2024</p>
+      <div class="card-footer">
+        <span class="card-meta">TECHCRUNCH · 3d ago</span>
+        <a class="card-read" href="#">READ →</a>
+      </div>
+    </div>
+    <!-- Card 6: Market news with sector hints -->
+    <div class="event-card">
+      <div class="left-glow"></div>
+      <div class="card-top">
+        <span class="card-type">MARKET NEWS</span>
+        <span class="card-sentiment bear">↓ BEARISH</span>
+      </div>
+      <p class="card-title">Fed Signals Fewer Rate Cuts in 2026 as Inflation Remains Sticky Above 3%</p>
+      <div class="sector-hints">
+        <span class="sector-pill">🏦 FINANCE</span>
+        <span class="sector-pill">🏠 REAL ESTATE</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-meta">BLOOMBERG · 6h ago</span>
+        <a class="card-read" href="#">READ →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ SUBSCRIBE MODAL ════════════ -->
+<div style="margin:60px 0;padding:0 24px">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#52525b;letter-spacing:0.15em;margin-bottom:16px">SUBSCRIBE MODAL PREVIEW (opens on "GET ALERTS" click)</div>
+  <div style="max-width:400px">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">GET ALERTS</div>
+          <div class="modal-sub">Email alerts when events hit your stocks</div>
+        </div>
+        <span class="modal-close">×</span>
+      </div>
+      <label class="input-label">EMAIL</label>
+      <input class="modal-input" type="email" value="you@example.com" style="font-size:13px">
+      <label class="input-label">WATCH STOCKS</label>
+      <input class="modal-input" placeholder="Search ticker or company..." style="margin-bottom:8px">
+      <div style="border:1px solid #27272a;border-radius:4px;margin-bottom:12px;overflow:hidden">
+        <div class="result-item"><span><span class="result-ticker">$NVDA</span><span class="result-company">Nvidia Corporation</span></span><span class="result-add">✓</span></div>
+        <div class="result-item"><span><span class="result-ticker">$TSLA</span><span class="result-company">Tesla, Inc.</span></span><span class="result-add">+ ADD</span></div>
+      </div>
+      <div class="chips">
+        <span class="chip">$NVDA ×</span>
+        <span class="chip">$AAPL ×</span>
+        <span class="chip">$MSFT ×</span>
+      </div>
+      <button class="btn-sub">SUBSCRIBE FOR FREE →</button>
+      <p class="modal-disclaimer">FREE FOREVER · UNSUBSCRIBE ANYTIME</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

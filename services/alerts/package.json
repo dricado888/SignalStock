@@ -1,0 +1,16 @@
+{
+  "name": "alerts",
+  "version": "1.0.0",
+  "description": "Polls PostgreSQL every 60 seconds for stock events matching user watchlists and sends email alerts via SendGrid. Each alert is recorded in `alerts_sent` so it's never sent twice.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "playwright": "^1.58.2"
+  }
+}

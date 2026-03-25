@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>body{background:#d0d7e3;padding:20px}</style>
+</head><body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
+                 Arial, sans-serif;
+    background: #eef2f7;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 600px;
+    margin: 36px auto;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+  }
+
+  /* ── gradient accent bar (colour set inline per-email via sentiment) ── */
+  .topbar { height: 5px; }
+
+  /* ── header ── */
+  .header {
+    background: #0f172a;
+    padding: 18px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { color: #f8fafc; font-size: 14px; font-weight: 700;
+            letter-spacing: 1.2px; text-transform: uppercase; }
+  .brand-sub { color: #475569; font-size: 10px; margin-top: 2px;
+                letter-spacing: 0.5px; text-transform: uppercase; }
+  .alert-pill {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #64748b;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── hero (dark, ticker) ── */
+  .hero {
+    background: #0f172a;
+    padding: 28px 30px 30px;
+    border-bottom: 1px solid #1e293b;
+  }
+  .ticker {
+    font-size: 52px;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .company {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 22px;
+    letter-spacing: 0.2px;
+  }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 13px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .chip-event {
+    background: rgba(99,102,241,0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99,102,241,0.3);
+  }
+  .chip-positive {
+    background: rgba(16,185,129,0.15);
+    color: #6ee7b7;
+    border: 1px solid rgba(16,185,129,0.3);
+  }
+  .chip-negative {
+    background: rgba(239,68,68,0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .chip-neutral {
+    background: rgba(245,158,11,0.15);
+    color: #fde68a;
+    border: 1px solid rgba(245,158,11,0.3);
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .dot-positive { background: #10b981; box-shadow: 0 0 5px rgba(16,185,129,0.7); }
+  .dot-negative { background: #ef4444; box-shadow: 0 0 5px rgba(239,68,68,0.7); }
+  .dot-neutral  { background: #f59e0b; box-shadow: 0 0 5px rgba(245,158,11,0.7); }
+
+  /* ── body ── */
+  .body { background: #ffffff; padding: 30px; }
+
+  .section-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  /* article card — border-left-color set via inline style per-email */
+  .article-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #6366f1;
+    border-radius: 0 10px 10px 0;
+    padding: 20px 20px;
+    margin-bottom: 28px;
+  }
+  .article-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .source-badge {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .pub-date { font-size: 12px; color: #94a3b8; }
+
+  /* CTA */
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #6366f1;
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 13px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  /* divider */
+  .divider { border: none; border-top: 1px solid #f1f5f9; margin: 26px 0; }
+
+  /* ── footer ── */
+  .footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 18px 30px;
+    text-align: center;
+  }
+  .footer p { font-size: 11px; color: #94a3b8; line-height: 1.7; }
+  .footer strong { color: #64748b; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar" style="background:linear-gradient(90deg,#10b981 0%,#34d399 60%,#06b6d4 100%)"></div>
+
+  <div class="header">
+    <div>
+      <div class="brand">SignalStock</div>
+      <div class="brand-sub">Market Intelligence</div>
+    </div>
+    <div class="alert-pill">Live Alert</div>
+  </div>
+
+  <div class="hero">
+    <div class="ticker">TSLA</div>
+    <div class="company">Tesla, Inc.</div>
+    <div class="chips">
+      <span class="chip chip-event">Product Launch</span>
+      <span class="chip chip-positive">
+        <span class="dot dot-positive"></span>
+        Bullish
+      </span>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="section-label">Triggering Article</div>
+    <div class="article-card" style="border-left-color:#10b981">
+      <div class="article-title">Lucid Announces Cosmos And Earth EVs To Battle Tesla Model Y - InsideEVs</div>
+      <div class="article-meta">
+        <span class="source-badge">InsideEVs</span>
+        <span class="pub-date">Mar 13, 2026 &middot; 23:17 UTC</span>
+      </div>
+    </div>
+    <a href="https://www.insideevs.com/news/example-article" class="cta">Read Full Article &nbsp;&#8594;</a>
+  </div>
+
+  <div class="footer">
+    <p>
+      You received this because <strong>TSLA</strong> is on your
+      SignalStock watchlist.<br>
+      &copy; 2026 SignalStock &middot; All rights reserved
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
+<div style="margin-bottom:40px"><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
+                 Arial, sans-serif;
+    background: #eef2f7;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 600px;
+    margin: 36px auto;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+  }
+
+  /* ── gradient accent bar (colour set inline per-email via sentiment) ── */
+  .topbar { height: 5px; }
+
+  /* ── header ── */
+  .header {
+    background: #0f172a;
+    padding: 18px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { color: #f8fafc; font-size: 14px; font-weight: 700;
+            letter-spacing: 1.2px; text-transform: uppercase; }
+  .brand-sub { color: #475569; font-size: 10px; margin-top: 2px;
+                letter-spacing: 0.5px; text-transform: uppercase; }
+  .alert-pill {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #64748b;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── hero (dark, ticker) ── */
+  .hero {
+    background: #0f172a;
+    padding: 28px 30px 30px;
+    border-bottom: 1px solid #1e293b;
+  }
+  .ticker {
+    font-size: 52px;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .company {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 22px;
+    letter-spacing: 0.2px;
+  }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 13px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .chip-event {
+    background: rgba(99,102,241,0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99,102,241,0.3);
+  }
+  .chip-positive {
+    background: rgba(16,185,129,0.15);
+    color: #6ee7b7;
+    border: 1px solid rgba(16,185,129,0.3);
+  }
+  .chip-negative {
+    background: rgba(239,68,68,0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .chip-neutral {
+    background: rgba(245,158,11,0.15);
+    color: #fde68a;
+    border: 1px solid rgba(245,158,11,0.3);
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .dot-positive { background: #10b981; box-shadow: 0 0 5px rgba(16,185,129,0.7); }
+  .dot-negative { background: #ef4444; box-shadow: 0 0 5px rgba(239,68,68,0.7); }
+  .dot-neutral  { background: #f59e0b; box-shadow: 0 0 5px rgba(245,158,11,0.7); }
+
+  /* ── body ── */
+  .body { background: #ffffff; padding: 30px; }
+
+  .section-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  /* article card — border-left-color set via inline style per-email */
+  .article-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #6366f1;
+    border-radius: 0 10px 10px 0;
+    padding: 20px 20px;
+    margin-bottom: 28px;
+  }
+  .article-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .source-badge {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .pub-date { font-size: 12px; color: #94a3b8; }
+
+  /* CTA */
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #6366f1;
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 13px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  /* divider */
+  .divider { border: none; border-top: 1px solid #f1f5f9; margin: 26px 0; }
+
+  /* ── footer ── */
+  .footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 18px 30px;
+    text-align: center;
+  }
+  .footer p { font-size: 11px; color: #94a3b8; line-height: 1.7; }
+  .footer strong { color: #64748b; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar" style="background:linear-gradient(90deg,#ef4444 0%,#f97316 60%,#eab308 100%)"></div>
+
+  <div class="header">
+    <div>
+      <div class="brand">SignalStock</div>
+      <div class="brand-sub">Market Intelligence</div>
+    </div>
+    <div class="alert-pill">Live Alert</div>
+  </div>
+
+  <div class="hero">
+    <div class="ticker">NVDA</div>
+    <div class="company">Nvidia Corporation</div>
+    <div class="chips">
+      <span class="chip chip-event">Regulatory Action</span>
+      <span class="chip chip-negative">
+        <span class="dot dot-negative"></span>
+        Bearish
+      </span>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="section-label">Triggering Article</div>
+    <div class="article-card" style="border-left-color:#ef4444">
+      <div class="article-title">US Moves to Restrict Nvidia Chip Exports to China Amid Escalating Tech War</div>
+      <div class="article-meta">
+        <span class="source-badge">Reuters</span>
+        <span class="pub-date">Mar 14, 2026 &middot; 09:45 UTC</span>
+      </div>
+    </div>
+    <a href="https://www.reuters.com/technology/example" class="cta">Read Full Article &nbsp;&#8594;</a>
+  </div>
+
+  <div class="footer">
+    <p>
+      You received this because <strong>NVDA</strong> is on your
+      SignalStock watchlist.<br>
+      &copy; 2026 SignalStock &middot; All rights reserved
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
+<div style="margin-bottom:40px"><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica,
+                 Arial, sans-serif;
+    background: #eef2f7;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 600px;
+    margin: 36px auto;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+  }
+
+  /* ── gradient accent bar (colour set inline per-email via sentiment) ── */
+  .topbar { height: 5px; }
+
+  /* ── header ── */
+  .header {
+    background: #0f172a;
+    padding: 18px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { color: #f8fafc; font-size: 14px; font-weight: 700;
+            letter-spacing: 1.2px; text-transform: uppercase; }
+  .brand-sub { color: #475569; font-size: 10px; margin-top: 2px;
+                letter-spacing: 0.5px; text-transform: uppercase; }
+  .alert-pill {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #64748b;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── hero (dark, ticker) ── */
+  .hero {
+    background: #0f172a;
+    padding: 28px 30px 30px;
+    border-bottom: 1px solid #1e293b;
+  }
+  .ticker {
+    font-size: 52px;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .company {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 22px;
+    letter-spacing: 0.2px;
+  }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 13px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+  .chip-event {
+    background: rgba(99,102,241,0.15);
+    color: #a5b4fc;
+    border: 1px solid rgba(99,102,241,0.3);
+  }
+  .chip-positive {
+    background: rgba(16,185,129,0.15);
+    color: #6ee7b7;
+    border: 1px solid rgba(16,185,129,0.3);
+  }
+  .chip-negative {
+    background: rgba(239,68,68,0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .chip-neutral {
+    background: rgba(245,158,11,0.15);
+    color: #fde68a;
+    border: 1px solid rgba(245,158,11,0.3);
+  }
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .dot-positive { background: #10b981; box-shadow: 0 0 5px rgba(16,185,129,0.7); }
+  .dot-negative { background: #ef4444; box-shadow: 0 0 5px rgba(239,68,68,0.7); }
+  .dot-neutral  { background: #f59e0b; box-shadow: 0 0 5px rgba(245,158,11,0.7); }
+
+  /* ── body ── */
+  .body { background: #ffffff; padding: 30px; }
+
+  .section-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  /* article card — border-left-color set via inline style per-email */
+  .article-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #6366f1;
+    border-radius: 0 10px 10px 0;
+    padding: 20px 20px;
+    margin-bottom: 28px;
+  }
+  .article-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+  .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .source-badge {
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .pub-date { font-size: 12px; color: #94a3b8; }
+
+  /* CTA */
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #6366f1;
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 13px 22px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  /* divider */
+  .divider { border: none; border-top: 1px solid #f1f5f9; margin: 26px 0; }
+
+  /* ── footer ── */
+  .footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    padding: 18px 30px;
+    text-align: center;
+  }
+  .footer p { font-size: 11px; color: #94a3b8; line-height: 1.7; }
+  .footer strong { color: #64748b; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar" style="background:linear-gradient(90deg,#6366f1 0%,#3b82f6 50%,#06b6d4 100%)"></div>
+
+  <div class="header">
+    <div>
+      <div class="brand">SignalStock</div>
+      <div class="brand-sub">Market Intelligence</div>
+    </div>
+    <div class="alert-pill">Live Alert</div>
+  </div>
+
+  <div class="hero">
+    <div class="ticker">AAPL</div>
+    <div class="company">Apple Inc.</div>
+    <div class="chips">
+      <span class="chip chip-event">Earnings Report</span>
+      <span class="chip chip-neutral">
+        <span class="dot dot-neutral"></span>
+        Neutral
+      </span>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="section-label">Triggering Article</div>
+    <div class="article-card" style="border-left-color:#6366f1">
+      <div class="article-title">Apple Reports Q1 2026 Earnings: Revenue In Line With Expectations</div>
+      <div class="article-meta">
+        <span class="source-badge">Yahoo Finance</span>
+        <span class="pub-date">Mar 15, 2026 &middot; 14:00 UTC</span>
+      </div>
+    </div>
+    <a href="https://finance.yahoo.com/news/apple-q1-2026" class="cta">Read Full Article &nbsp;&#8594;</a>
+  </div>
+
+  <div class="footer">
+    <p>
+      You received this because <strong>AAPL</strong> is on your
+      SignalStock watchlist.<br>
+      &copy; 2026 SignalStock &middot; All rights reserved
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
+
+</body></html>
