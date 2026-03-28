@@ -1,0 +1,24 @@
+# Node
+frontend/node_modules
+frontend/dist
+frontend/.env*
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/venv
+**/.venv
+**/.pytest_cache
+
+# Secrets
+**/.env
+**/.env.*
+
+# Git
+.git
+.github
+
+# IDE
+.vscode
+.idea
