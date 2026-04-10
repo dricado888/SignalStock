@@ -18,8 +18,9 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
+        sans:   ['Inter', 'system-ui', 'sans-serif'],
+        mono:   ['"JetBrains Mono"', '"Fira Code"', 'monospace'],
+        ticker: ['"JetBrains Mono"', '"Fira Code"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
         'cyan-glow': '0 0 0 1px rgba(34,211,238,0.3), 0 4px 20px rgba(34,211,238,0.06)',

@@ -39,7 +39,7 @@ Finlight / NewsAPI / Twitter (Apify)
 
 | Container    | Role                                          |
 |-------------|-----------------------------------------------|
-| `postgres`  | Primary data store (9 tables)                 |
+| `postgres`  | Primary data store (8 tables)                 |
 | `redis`     | Article queue + price cache                   |
 | `scraper`   | Polls news APIs + Twitter every 5 min         |
 | `classifier`| Dequeues articles, calls Groq LLM             |
@@ -58,9 +58,9 @@ Finlight / NewsAPI / Twitter (Apify)
 | API         | FastAPI (Python), JWT auth, Redis cache           |
 | Scraper     | Python, Apify (Twitter), Finlight, NewsAPI        |
 | Classifier  | Python, Groq API (llama-3.1-8b-instant)           |
-| Stock Mapper| Python, regex, fuzzywuzzy, sector affinity        |
+| Stock Mapper| Python, regex, rapidfuzz, sector affinity         |
 | Alert Engine| Python, SendGrid, HTML email templates            |
-| Database    | PostgreSQL 15 (normalized schema, 9 tables)       |
+| Database    | PostgreSQL 15 (normalized schema, 8 tables)       |
 | Queue/Cache | Redis 7 (LIST queue + TTL cache)                  |
 | Infra       | Docker Compose, health checks                     |
 
@@ -72,37 +72,34 @@ Finlight / NewsAPI / Twitter (Apify)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Git](https://git-scm.com/)
 
-### 1. Clone and configure
+### 1. Clone
 
 ```bash
-git clone https://github.com/yourusername/signalstock.git
-cd signalstock
+git clone https://github.com/dricado888/SignalStock.git
+cd SignalStock
 ```
 
-Copy and fill in the `.env.example` files for each service:
+### 2. Configure API keys
+
+Copy the example env files for each service:
 
 ```bash
-# Root (optional — for reference)
-cp .env.example .env
-
-# Each service needs its own .env
 cp services/scraper/.env.example    services/scraper/.env
 cp services/classifier/.env.example services/classifier/.env
+cp services/mapper/.env.example     services/mapper/.env
 cp services/alerts/.env.example     services/alerts/.env
 cp services/api/.env.example        services/api/.env
 ```
 
-### 2. Add your API keys
-
-Edit each `.env` file and fill in the keys (all free tier):
+Edit each `.env` file and fill in your keys (all free tier):
 
 | Key | Service | Free Tier |
 |-----|---------|-----------|
-| `GROQ_API_KEY` | [groq.com](https://groq.com) | 500 req/min |
+| `GROQ_API_KEY` | [console.groq.com](https://console.groq.com) | 14,400 req/day, no credit card |
 | `FINNHUB_API_KEY` | [finnhub.io](https://finnhub.io) | 60 req/min |
 | `FINLIGHT_API_KEY` | [finlight.me](https://finlight.me) | 10K req/month |
 | `NEWSAPI_KEY` | [newsapi.org](https://newsapi.org) | 100 req/day |
-| `APIFY_API_TOKEN` | [apify.com](https://apify.com) | 300 runs/month |
+| `APIFY_API_TOKEN` | [apify.com](https://apify.com) | Optional — leave blank to skip Twitter |
 | `SENDGRID_API_KEY` | [sendgrid.com](https://sendgrid.com) | 100 emails/day |
 
 ### 3. Run
@@ -111,15 +108,38 @@ Edit each `.env` file and fill in the keys (all free tier):
 docker compose up -d
 ```
 
-- Dashboard: http://localhost:5173
-- API: http://localhost:8000/docs
+The database schema is applied automatically on first start.
 
-### 4. Apply database migrations
+- Dashboard: http://localhost:5173
+- API docs: http://localhost:8000/docs
+
+### 4. Seed stock data (optional)
+
+Preloads 50+ common tickers so the mapper has something to match against:
 
 ```bash
-docker compose exec postgres psql -U signalstock -d signalstock \
-  -f /docker-entrypoint-initdb.d/init.sql
+docker exec -i signalstock-db psql -U signalstock -d signalstock < db/seed_data.sql
 ```
+
+---
+
+## Running Locally Without Docker
+
+If you have PostgreSQL and Redis running locally:
+
+```bash
+# Terminal 1 — API
+cd services/api
+pip install -r requirements.txt
+python -m uvicorn main:app --reload --port 8000
+
+# Terminal 2 — Frontend
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173. The Vite dev server proxies all `/api/*` requests to port 8000.
 
 ---
 
@@ -157,8 +177,9 @@ users ──────────── user_preferences
 signalstock/
 ├── docker-compose.yml
 ├── db/
-│   ├── init.sql                  # Schema + seed data
-│   └── migrations/               # Incremental migrations
+│   ├── init.sql                  # Schema (auto-applied on first docker start)
+│   ├── seed_data.sql             # Optional: preload 50+ stock tickers
+│   └── migrations/               # Incremental migration scripts
 ├── services/
 │   ├── scraper/                  # News + Twitter scraping
 │   ├── classifier/               # Groq LLM classification
@@ -168,7 +189,9 @@ signalstock/
 └── frontend/                     # React dashboard
     └── src/
         ├── pages/
-        │   └── Dashboard.jsx     # Main event feed + pagination
+        │   ├── Dashboard.jsx     # Main event feed + charts
+        │   ├── EventsPage.jsx    # Filterable full event list
+        │   └── WatchlistPage.jsx # Manage watched stocks
         └── components/           # EventCard, PreferencesModal, etc.
 ```
 
