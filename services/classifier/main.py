@@ -27,6 +27,8 @@ import redis
 from dotenv import load_dotenv
 
 import hf_client
+import ticker_extractor
+from company_mapping import TICKER_TO_COMPANY
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -125,6 +127,43 @@ def insert_event(
 
 
 # ---------------------------------------------------------------------------
+# Stock mapping (inline — no separate mapper service needed)
+# ---------------------------------------------------------------------------
+
+def map_event_to_stocks(
+    conn: psycopg2.extensions.connection,
+    event_id: int,
+    title: str,
+    content: str,
+) -> None:
+    """Extract tickers from article text and link them to the event."""
+    tickers = ticker_extractor.extract_tickers(title, content or "")
+    if not tickers:
+        return
+    with conn.cursor() as cur:
+        for ticker in tickers:
+            company_name = TICKER_TO_COMPANY.get(ticker, ticker)
+            # Get or create the stock row
+            cur.execute("SELECT id FROM stocks WHERE ticker = %s", (ticker,))
+            row = cur.fetchone()
+            if row:
+                stock_id = row[0]
+            else:
+                cur.execute(
+                    "INSERT INTO stocks (ticker, company_name) VALUES (%s, %s) RETURNING id",
+                    (ticker, company_name),
+                )
+                stock_id = cur.fetchone()[0]
+            # Link event → stock (ignore duplicates)
+            cur.execute(
+                "INSERT INTO event_stocks (event_id, stock_id) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                (event_id, stock_id),
+            )
+    conn.commit()
+    logger.info("Mapped event id=%d to tickers: %s", event_id, tickers)
+
+
+# ---------------------------------------------------------------------------
 # Core processing
 # ---------------------------------------------------------------------------
 
@@ -189,6 +228,12 @@ def process_article(
             event_id, article_id,
             result["event_type"], result["sentiment"], result.get("confidence", 0.0),
         )
+
+        # 5. Map event to stocks (replaces the standalone mapper service)
+        try:
+            map_event_to_stocks(conn, event_id, article["title"], article.get("content", ""))
+        except Exception as map_exc:
+            logger.warning("Stock mapping failed for event id=%d: %s", event_id, map_exc)
 
     except Exception as exc:
         logger.error(
