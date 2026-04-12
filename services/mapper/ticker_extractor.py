@@ -74,8 +74,12 @@ EXCLUDE_WORDS: set[str] = {
     "OTC", "ADR", "ADS", "ESG", "DEI", "ROI", "ROE", "EPS",
     # Roman numerals (appear in "Phase II", "Series III", "Q4 FY2024" etc.)
     "I", "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII",
+    # Government agencies / space / non-stock bodies
+    "NASA", "FEMA", "NOAA", "DARPA", "DOD", "DOE", "EPA",
     # Radio stations / local abbreviations that slip through
     "KUT", "NPR", "PBS", "ABC", "NBC", "CBS",
+    # Media company names that appear as source suffixes
+    "FORTUNE", "FORBES", "WIRED", "AXIOS", "QUARTZ",
     # Other observed false positives
     "OF", "IN", "AT", "BY", "TO", "OR", "IF", "AS", "BE",
     "UP", "GO", "NO", "SO", "DO", "IS", "IT", "ON", "AN",
@@ -90,6 +94,15 @@ CAPITALIZED_PHRASE_PATTERN = re.compile(
 )
 
 
+# Regex to strip news source suffix from titles: " - WSJ", " - Fortune", " - KUT" etc.
+_SOURCE_SUFFIX = re.compile(r"\s*[-–]\s*[A-Za-z0-9 ]{1,30}$")
+
+
+def _clean_title(title: str) -> str:
+    """Strip trailing '- Source' attribution from article headlines."""
+    return _SOURCE_SUFFIX.sub("", title).strip()
+
+
 def extract_tickers(title: str, content: str) -> List[str]:
     """
     Extract unique stock ticker symbols from a financial news article.
@@ -102,13 +115,14 @@ def extract_tickers(title: str, content: str) -> List[str]:
         Sorted list of unique ticker strings (e.g. ["AAPL", "MSFT"]).
     """
     tickers: set[str] = set()
+    clean_title = _clean_title(title)
 
     # ------------------------------------------------------------------
     # Step 1: Company name word-boundary match (most reliable)
-    # Check title + first 1000 chars of content for known company names.
+    # Check clean title + first 1000 chars of content for known company names.
     # Word boundaries prevent "Citi" matching inside "citing".
     # ------------------------------------------------------------------
-    search_text = f"{title} {(content or '')[:1000]}"
+    search_text = f"{clean_title} {(content or '')[:1000]}"
     for pattern, ticker in _COMPANY_PATTERNS:
         if pattern.search(search_text):
             tickers.add(ticker)
@@ -116,10 +130,10 @@ def extract_tickers(title: str, content: str) -> List[str]:
 
     # ------------------------------------------------------------------
     # Step 2: Explicit ticker regex
-    # Find ALL-CAPS words (2-5 chars) in title + first 3000 chars of content,
+    # Find ALL-CAPS words (2-5 chars) in clean title + first 3000 chars of content,
     # excluding known non-ticker words.
     # ------------------------------------------------------------------
-    full_text = f"{title} {(content or '')[:3000]}"
+    full_text = f"{clean_title} {(content or '')[:3000]}"
     for match in TICKER_PATTERN.finditer(full_text):
         word = match.group(1)
         if len(word) >= 2 and word not in EXCLUDE_WORDS:
@@ -127,12 +141,12 @@ def extract_tickers(title: str, content: str) -> List[str]:
             logger.debug("Regex ticker match: %s", word)
 
     # ------------------------------------------------------------------
-    # Step 3: Fuzzy match on capitalised phrases from title
-    # Only applies to the title (short, focused) to avoid false positives
-    # in noisy body text.
+    # Step 3: Fuzzy match on capitalised phrases from clean title
+    # Only applies to the title (short, focused) to avoid false positives.
+    # Minimum 7 chars prevents single words like "Home" matching "Home Depot".
     # ------------------------------------------------------------------
-    for phrase in CAPITALIZED_PHRASE_PATTERN.findall(title):
-        if len(phrase) < 5:  # too short to be a company name
+    for phrase in CAPITALIZED_PHRASE_PATTERN.findall(clean_title):
+        if len(phrase) < 7:  # too short — avoids "Home" → HD false positives
             continue
         matched = fuzzy_match(phrase)
         if matched:

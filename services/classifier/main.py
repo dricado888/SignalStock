@@ -215,6 +215,14 @@ def process_article(
                 rc.rpush(QUEUE_KEY, article_id)
             return
 
+        # LLM decided this article is not relevant to financial markets — skip it
+        if result.get("event_type") == "not_relevant":
+            logger.info(
+                "Article id=%d classified as not_relevant (not a financial event). Discarding.",
+                article_id,
+            )
+            return
+
         # 4. Persist event
         event_id = insert_event(
             conn,

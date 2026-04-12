@@ -28,12 +28,25 @@ MODELS = [
 VALID_EVENT_TYPES = {
     "earnings_report", "merger_acquisition", "product_launch",
     "regulatory_action", "executive_change", "lawsuit",
-    "partnership", "other",
+    "partnership", "other", "not_relevant",
 }
 VALID_SENTIMENTS = {"positive", "negative", "neutral"}
 
 SYSTEM_PROMPT = """\
-You are a financial news event classifier. Classify the given article into ONE event type and ONE sentiment.
+You are a financial news classifier for a stock market intelligence platform.
+
+FIRST decide: is this article directly relevant to publicly traded companies or financial markets?
+
+NOT relevant examples (return not_relevant):
+- Sports, entertainment, celebrity news with no stock angle
+- Pure science/space news not tied to a public company
+- Local news, crime, politics with no market impact
+- Food/lifestyle articles about non-public companies
+- Any article where no publicly traded company is meaningfully affected
+
+If NOT relevant, return: {"event_type": "not_relevant", "sentiment": "neutral", "confidence": 1.0}
+
+If RELEVANT, classify into ONE event type and ONE sentiment:
 
 Event types:
 - earnings_report: quarterly/annual earnings results
@@ -43,7 +56,7 @@ Event types:
 - executive_change: CEO, CFO, or other leadership changes
 - lawsuit: legal actions, settlements, court decisions
 - partnership: business partnerships or joint ventures
-- other: anything that does not fit the above
+- other: relevant to markets but does not fit the above
 
 Sentiments:
 - positive: good news for the company or stock price
