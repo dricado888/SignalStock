@@ -72,6 +72,13 @@ EXCLUDE_WORDS: set[str] = {
     # Common abbreviations that look like tickers
     "LLC", "LTD", "INC", "CORP", "PLC", "CO", "LP",
     "OTC", "ADR", "ADS", "ESG", "DEI", "ROI", "ROE", "EPS",
+    # Roman numerals (appear in "Phase II", "Series III", "Q4 FY2024" etc.)
+    "I", "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII",
+    # Radio stations / local abbreviations that slip through
+    "KUT", "NPR", "PBS", "ABC", "NBC", "CBS",
+    # Other observed false positives
+    "OF", "IN", "AT", "BY", "TO", "OR", "IF", "AS", "BE",
+    "UP", "GO", "NO", "SO", "DO", "IS", "IT", "ON", "AN",
 }
 
 # Regex: 1-5 uppercase letters surrounded by word boundaries

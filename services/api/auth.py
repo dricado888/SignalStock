@@ -1,4 +1,5 @@
 """JWT auth: register, login, /me."""
+import logging
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
@@ -8,13 +9,20 @@ import psycopg2.extras
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from database import get_conn
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 SECRET_KEY = os.environ.get("JWT_SECRET", "change-me-in-production-please")
+if SECRET_KEY == "change-me-in-production-please":
+    import logging as _log
+    _log.getLogger(__name__).warning(
+        "JWT_SECRET is using the insecure default value! Set JWT_SECRET env var in production."
+    )
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_DAYS = 7
 
@@ -36,7 +44,7 @@ def _verify_password(password: str, hashed: str) -> bool:
 
 class RegisterIn(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=8)
 
 class LoginIn(BaseModel):
     email: EmailStr
