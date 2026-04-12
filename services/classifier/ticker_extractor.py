@@ -18,12 +18,18 @@ from company_mapping import COMPANY_TO_TICKER, fuzzy_match
 
 logger = logging.getLogger(__name__)
 
-# Pre-compiled word-boundary patterns for every known company name.
-# Using \b ensures "Citi" does NOT match inside "citing".
-_COMPANY_PATTERNS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\b" + re.escape(company) + r"\b", re.IGNORECASE), ticker)
-    for company, ticker in COMPANY_TO_TICKER.items()
-]
+# Split company patterns by specificity:
+# - Single-word names (Apple, Zoom, Block) → title only to avoid body false positives
+# - Multi-word names (Home Depot, Goldman Sachs) → title + content (specific enough)
+_TITLE_ONLY_PATTERNS: list[tuple[re.Pattern, str]] = []
+_CONTENT_PATTERNS:    list[tuple[re.Pattern, str]] = []
+
+for _company, _ticker in COMPANY_TO_TICKER.items():
+    _pat = re.compile(r"\b" + re.escape(_company) + r"\b", re.IGNORECASE)
+    if " " in _company:
+        _CONTENT_PATTERNS.append((_pat, _ticker))
+    else:
+        _TITLE_ONLY_PATTERNS.append((_pat, _ticker))
 
 # ---------------------------------------------------------------------------
 # Words that match the ticker regex but are NOT stock tickers
@@ -118,15 +124,23 @@ def extract_tickers(title: str, content: str) -> List[str]:
     clean_title = _clean_title(title)
 
     # ------------------------------------------------------------------
-    # Step 1: Company name word-boundary match (most reliable)
-    # Check clean title + first 1000 chars of content for known company names.
-    # Word boundaries prevent "Citi" matching inside "citing".
+    # Step 1a: Single-word company names — title only
+    # (prevents "zoom" in body → ZM, "shell" → SHEL, "target" → TGT etc.)
+    # ------------------------------------------------------------------
+    for pattern, ticker in _TITLE_ONLY_PATTERNS:
+        if pattern.search(clean_title):
+            tickers.add(ticker)
+            logger.debug("Title company match: → %s", ticker)
+
+    # ------------------------------------------------------------------
+    # Step 1b: Multi-word company names — title + first 1000 chars content
+    # (e.g. "Home Depot", "Goldman Sachs" — specific enough to be safe)
     # ------------------------------------------------------------------
     search_text = f"{clean_title} {(content or '')[:1000]}"
-    for pattern, ticker in _COMPANY_PATTERNS:
+    for pattern, ticker in _CONTENT_PATTERNS:
         if pattern.search(search_text):
             tickers.add(ticker)
-            logger.debug("Company name match: → %s", ticker)
+            logger.debug("Content company match: → %s", ticker)
 
     # ------------------------------------------------------------------
     # Step 2: Explicit ticker regex
