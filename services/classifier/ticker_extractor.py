@@ -82,6 +82,8 @@ EXCLUDE_WORDS: set[str] = {
     "I", "II", "III", "IV", "VI", "VII", "VIII", "IX", "XI", "XII",
     # Government agencies / space / non-stock bodies
     "NASA", "FEMA", "NOAA", "DARPA", "DOD", "DOE", "EPA",
+    # Commodity benchmarks (not stocks)
+    "WTI", "LNG", "LPG", "OPEC",
     # Radio stations / local abbreviations that slip through
     "KUT", "NPR", "PBS", "ABC", "NBC", "CBS",
     # Media company names that appear as source suffixes

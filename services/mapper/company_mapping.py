@@ -217,6 +217,9 @@ COMPANY_TO_TICKER: dict[str, str] = {
     "Snap": "SNAP",
 
     # Media & telecom
+    "YouTube": "GOOGL",
+    "Instagram": "META",
+    "WhatsApp": "META",
     "Disney": "DIS",
     "Walt Disney": "DIS",
     "Comcast": "CMCSA",
