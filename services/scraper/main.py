@@ -20,7 +20,7 @@ import psycopg2.pool
 import redis
 from dotenv import load_dotenv
 
-from scrapers import finlight, newsapi
+from scrapers import finlight, newsapi, rss
 from scrapers import apify_twitter
 
 # ---------------------------------------------------------------------------
@@ -176,6 +176,13 @@ def scrape_and_store(
         raw_articles.extend(na_articles)
     except Exception as exc:
         logger.error("NewsAPI scrape failed: %s", exc, exc_info=True)
+
+    try:
+        rss_articles = rss.fetch_articles()
+        logger.info("RSS: fetched %d articles total.", len(rss_articles))
+        raw_articles.extend(rss_articles)
+    except Exception as exc:
+        logger.error("RSS scrape failed: %s", exc, exc_info=True)
 
     # Twitter — only run when Apify token is configured and interval has elapsed
     global _last_twitter_poll

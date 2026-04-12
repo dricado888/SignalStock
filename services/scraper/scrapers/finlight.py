@@ -60,7 +60,7 @@ def fetch_articles(
     api_key: str,
     redis_client: Any,
     query: str = "stocks OR earnings OR market OR finance",
-    max_results: int = 10,
+    max_results: int = 25,
     retries: int = 3,
 ) -> list[dict]:
     """

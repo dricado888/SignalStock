@@ -3,3 +3,4 @@ psycopg2-binary==2.9.10
 redis==5.0.8
 python-dotenv==1.0.1
 apify-client>=1.6.0
+feedparser==6.0.11
