@@ -8,6 +8,7 @@ BEGIN;
 -- ============================================
 INSERT INTO stocks (ticker, company_name) VALUES
     -- Mega-cap tech
+    
     ('AAPL',  'Apple Inc.'),
     ('NVDA',  'NVIDIA Corporation'),
     ('TSLA',  'Tesla, Inc.'),
